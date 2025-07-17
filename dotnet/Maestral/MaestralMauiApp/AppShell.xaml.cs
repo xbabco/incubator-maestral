@@ -1,6 +1,7 @@
-﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using Font = Microsoft.Maui.Font;
+using MaestralMauiApp.Pages;
 
 namespace MaestralMauiApp
 {
@@ -9,12 +10,13 @@ namespace MaestralMauiApp
         public AppShell()
         {
             InitializeComponent();
+            Routing.RegisterRoute("imageselector", typeof(ImageSelectorPage));
             var currentTheme = Application.Current!.RequestedTheme;
             ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
         }
         public static async Task DisplaySnackbarAsync(string message)
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationTokenSource = new();
 
             var snackbarOptions = new SnackbarOptions
             {

@@ -1,11 +1,11 @@
-using MaestralMauiApp.Models;
+using Microsoft.Maui.Controls;
 using MaestralMauiApp.PageModels;
 
 namespace MaestralMauiApp.Pages
 {
-    public partial class MainPage : ContentPage
+    public partial class ImageSelectorPage : ContentPage
     {
-        public MainPage(MainPageModel model)
+        public ImageSelectorPage(ImageSelectorPageModel model)
         {
             InitializeComponent();
             BindingContext = model;

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
 
@@ -28,8 +28,8 @@ namespace MaestralMauiApp
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
-    		builder.Services.AddLogging(configure => configure.AddDebug());
+            builder.Logging.AddDebug();
+            builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
 
             builder.Services.AddSingleton<ProjectRepository>();
@@ -44,8 +44,34 @@ namespace MaestralMauiApp
 
             builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
             builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
+            builder.Services.AddTransientWithShellRoute<ImageSelectorPage, ImageSelectorPageModel>("imageselector");
+            builder.Services.AddTransientWithShellRoute<TextRecognitionImagePage, TextRecognitionImagePageModel>("textrecognitionimage");
+
+#if ANDROID
+            builder.Services.AddSingleton<ITextRecognizer, AndroidTextRecognizer>();
+#elif WINDOWS
+            builder.Services.AddSingleton<ITextRecognizer, WindowsTextRecognizer>();
+#else
+            builder.Services.AddSingleton<ITextRecognizer, StubTextRecognizer>();
+#endif
 
             return builder.Build();
+        }
+    }
+
+    public class SomeViewModel
+    {
+        private readonly ITextRecognizer _textRecognizer;
+
+        public SomeViewModel(ITextRecognizer textRecognizer)
+        {
+            _textRecognizer = textRecognizer;
+        }
+
+        public async Task<RecognizedTextResult> Recognize(Stream imageStream)
+        {
+            var text = await _textRecognizer.RecognizeTextAsync(imageStream);
+            return text;
         }
     }
 }

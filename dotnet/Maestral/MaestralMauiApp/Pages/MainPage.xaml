@@ -18,7 +18,7 @@
                 EventName="NavigatedFrom"
                 Command="{Binding NavigatedFromCommand}" />
         <toolkit:EventToCommandBehavior
-                EventName="Appearing"                
+                EventName="Appearing"
                 Command="{Binding AppearingCommand}" />
     </ContentPage.Behaviors>
 
@@ -81,5 +81,6 @@
         <controls:AddButton 
             IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
             Command="{Binding AddTaskCommand}" />
+
     </Grid>
 </ContentPage>

@@ -7,7 +7,6 @@ namespace MaestralMauiApp.Pages
         public ProjectDetailPage(ProjectDetailPageModel model)
         {
             InitializeComponent();
-
             BindingContext = model;
         }
     }

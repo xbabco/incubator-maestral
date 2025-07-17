@@ -26,6 +26,18 @@
         ContentTemplate="{DataTemplate pages:ManageMetaPage}"
         Route="manage" />
 
+    <ShellContent
+        Title="Image Selector"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pages:ImageSelectorPage}"
+        Route="imageselector" />
+
+    <ShellContent
+        Title="Text Recognition Image"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pages:TextRecognitionImagePage}"
+        Route="textrecognitionimage" />
+
     <Shell.FlyoutFooter>
         <Grid Padding="15">
             <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
