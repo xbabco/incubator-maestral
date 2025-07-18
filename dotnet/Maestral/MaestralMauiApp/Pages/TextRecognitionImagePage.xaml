@@ -5,8 +5,11 @@
              x:Class="MaestralMauiApp.Pages.TextRecognitionImagePage"
              x:DataType="pageModels:TextRecognitionImagePageModel"
              Title="Text Recognition Image">
-    <VerticalStackLayout Spacing="24" Padding="24">
-        <Image Source="{Binding SelectedImage}" HeightRequest="300" Aspect="AspectFit" />
-        <Button Text="Pick Image" Command="{Binding SelectImageCommand}" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Spacing="24" Padding="24">
+            <Image Source="{Binding SelectedImage}" HeightRequest="300" Aspect="AspectFit" />
+            <Button Text="Pick Image" Command="{Binding SelectImageCommand}" />
+            <Label Text="{Binding RecognizedText}" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

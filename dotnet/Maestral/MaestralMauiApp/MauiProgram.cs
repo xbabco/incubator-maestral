@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using Plugin.Maui.OCR;
 using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace MaestralMauiApp
@@ -47,13 +48,7 @@ namespace MaestralMauiApp
             builder.Services.AddTransientWithShellRoute<ImageSelectorPage, ImageSelectorPageModel>("imageselector");
             builder.Services.AddTransientWithShellRoute<TextRecognitionImagePage, TextRecognitionImagePageModel>("textrecognitionimage");
 
-#if ANDROID
-            builder.Services.AddSingleton<ITextRecognizer, AndroidTextRecognizer>();
-#elif WINDOWS
-            builder.Services.AddSingleton<ITextRecognizer, WindowsTextRecognizer>();
-#else
-            builder.Services.AddSingleton<ITextRecognizer, StubTextRecognizer>();
-#endif
+            builder.Services.AddSingleton(OcrPlugin.Default);
 
             return builder.Build();
         }

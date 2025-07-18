@@ -16,5 +16,9 @@
         <controls:AddButton
             IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
             Command="{Binding TextRecognitionCommand}" />
+
+        <controls:AddButton
+            IsEnabled="true"
+            Command="{Binding TextRecognitionCommand}" />
     </VerticalStackLayout>
 </ContentPage>

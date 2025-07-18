@@ -1,15 +1,21 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Plugin.Maui.OCR;
+using Syncfusion.Maui.Toolkit.Internals;
+using System.Diagnostics;
+using System.Reflection;
+using System.Resources;
 
 namespace MaestralMauiApp.PageModels;
 
 public partial class ImageSelectorPageModel : ObservableObject
 {
-    private readonly ITextRecognizer _textRecognizer;
+    private readonly IOcrService _ocr;
 
-    public ImageSelectorPageModel(ITextRecognizer textRecognizer)
+    public ImageSelectorPageModel(IOcrService ocr)
     {
-        _textRecognizer = textRecognizer;
+        _ocr = ocr;
+        _ocr.InitAsync();
     }
 
     [ObservableProperty]
@@ -32,15 +38,12 @@ public partial class ImageSelectorPageModel : ObservableObject
             {
                 return;
             }
-            //using var stream = await fileResult.OpenReadAsync();
-            //var imageStream = new MemoryStream();
-            //await stream.CopyToAsync(imageStream);
-            //imageStream.Position = 0;
-            //SelectedImage = ImageSource.FromStream(() => imageStream);
+
             SelectedImage = ImageSource.FromFile(fileResult.FullPath);
         }
-        catch
+        catch (Exception ex)
         {
+            await AppShell.DisplayToastAsync($"Error selecting image: {ex.Message}");
         }
     }
 
@@ -48,42 +51,75 @@ public partial class ImageSelectorPageModel : ObservableObject
     private async Task TextRecognition()
     {
         IsBusy = true;
-        var result = SelectedImage switch
+        try
         {
-            FileImageSource fileImageSource =>
-                await _textRecognizer.RecognizeTextAsync(File.OpenRead(fileImageSource.File)),
-            StreamImageSource streamImageSource =>
-                await _textRecognizer.RecognizeTextAsync(await streamImageSource.Stream(CancellationToken.None)),
-            _ => null
-        };
-        IsBusy = false;
+            var imageData = await GetImageDataAsync(SelectedImage);
+            if (imageData == null)
+            {
+                await AppShell.DisplayToastAsync("Could not read image data.");
+                return;
+            }
 
-        if (result == null)
-        {
-            await AppShell.DisplayToastAsync("No text found");
-            return;
-        }
-        Console.WriteLine(result);
+            var result = await _ocr.RecognizeTextAsync(imageData);
 
-    }
-
-    /*
-List<Text.TextBlock> blocks = texts.getTextBlocks();
-    if (blocks.size() == 0) {
-        showToast("No text found");
-        return;
-    }
-    mGraphicOverlay.clear();
-    for (int i = 0; i < blocks.size(); i++) {
-        List<Text.Line> lines = blocks.get(i).getLines();
-        for (int j = 0; j < lines.size(); j++) {
-            List<Text.Element> elements = lines.get(j).getElements();
-            for (int k = 0; k < elements.size(); k++) {
-                Graphic textGraphic = new TextGraphic(mGraphicOverlay, elements.get(k));
-                mGraphicOverlay.add(textGraphic);
-
+            if (result.Success)
+            {
+                await AppShell.DisplayToastAsync("Text recognized!");
+                Debug.WriteLine(result.AllText);
+                Console.WriteLine(result.AllText);
+            }
+            else
+            {
+                await AppShell.DisplayToastAsync("No text found or an error occurred.");
             }
         }
+        catch (Exception ex)
+        {
+            await AppShell.DisplayToastAsync($"Error during text recognition: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
-     */
+
+    private async Task<byte[]?> GetImageDataAsync(ImageSource imageSource)
+    {
+        Stream? stream = null;
+        try
+        {
+            if (imageSource is FileImageSource fileSource)
+            {
+                if (Path.IsPathRooted(fileSource.File))
+                {
+                    stream = File.OpenRead(fileSource.File);
+                }
+                else
+                {
+                    stream = await FileSystem.OpenAppPackageFileAsync(fileSource.File);
+                    //using var memoryStream = new MemoryStream();
+                    //await stream.CopyToAsync(memoryStream);
+                    //byte[] imageBytes = memoryStream.ToArray();
+                }
+            }
+            else if (imageSource is StreamImageSource streamSource)
+            {
+                stream = await streamSource.Stream(CancellationToken.None);
+            }
+
+            if (stream == null)
+            {
+                return null;
+            }
+
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
+        finally
+        {
+            stream?.Dispose();
+        }
+    }
 }
+
