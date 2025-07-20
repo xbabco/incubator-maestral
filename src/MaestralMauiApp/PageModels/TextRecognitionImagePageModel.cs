@@ -11,15 +11,17 @@ public partial class TextRecognitionImagePageModel : ObservableObject
     private readonly IOcrService _ocr;
 
     [ObservableProperty]
-    private ImageSource _selectedImage = "sample_image.jpg";
+    public partial ImageSource SelectedImage { get; set; } = "sample_image.jpg";
 
     [ObservableProperty]
-    private string? _recognizedText;
+    public partial RecognizedTextResult? RecognizedTextResult { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsBusy { get; set; }
 
     public TextRecognitionImagePageModel(IOcrService ocr)
     {
         _ocr = ocr;
-        _ocr.InitAsync();
     }
 
     [RelayCommand]
@@ -36,23 +38,99 @@ public partial class TextRecognitionImagePageModel : ObservableObject
                     }
                 )
                 .ConfigureAwait(false);
+
             if (fileResult != null)
             {
-                using var stream = await fileResult.OpenReadAsync().ConfigureAwait(false);
-                var imageStream = new MemoryStream();
-                await stream.CopyToAsync(imageStream).ConfigureAwait(false);
-                imageStream.Position = 0;
-                SelectedImage = ImageSource.FromStream(() => imageStream);
-
-                imageStream.Position = 0;
-                var ocrResult = await _ocr.RecognizeTextAsync(imageStream.ToArray())
-                    .ConfigureAwait(false);
-                if (ocrResult.Success)
-                {
-                    RecognizedText = ocrResult.AllText;
-                }
+                SelectedImage = ImageSource.FromFile(fileResult.FullPath);
             }
         }
-        catch { }
+        catch (Exception)
+        {
+            // Handle exception
+        }
+    }
+
+    [RelayCommand]
+    private async Task TextRecognition()
+    {
+        IsBusy = true;
+
+        try
+        {
+            var imageData = await GetImageDataAsync(SelectedImage).ConfigureAwait(false);
+            if (imageData == null)
+            {
+                return;
+            }
+
+            var result = await _ocr.RecognizeTextAsync(imageData).ConfigureAwait(false);
+            if (result.Success)
+            {
+                RecognizedTextResult = ConvertOcrResultToRecognizedTextResult(result);
+            }
+        }
+        catch (Exception)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static async Task<byte[]?> GetImageDataAsync(ImageSource imageSource)
+    {
+        Stream? stream = null;
+        try
+        {
+            if (imageSource is FileImageSource fileSource)
+            {
+                if (Path.IsPathRooted(fileSource.File))
+                {
+                    stream = await Task.Run(() => File.OpenRead(fileSource.File))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    stream = await FileSystem
+                        .OpenAppPackageFileAsync(fileSource.File)
+                        .ConfigureAwait(false);
+                }
+            }
+            else if (imageSource is StreamImageSource streamSource)
+            {
+                stream = await streamSource.Stream(CancellationToken.None).ConfigureAwait(false);
+            }
+
+            if (stream == null)
+            {
+                return null;
+            }
+
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            return memoryStream.ToArray();
+        }
+        finally
+        {
+            stream?.Dispose();
+        }
+    }
+
+    private static RecognizedTextResult ConvertOcrResultToRecognizedTextResult(OcrResult ocrResult)
+    {
+        var recognizedResult = new RecognizedTextResult(ocrResult.AllText)
+        {
+            Blocks = ocrResult
+                .Elements.Select(e => new RecognizedTextBlock
+                {
+                    Text = e.Text,
+                    BoundingBox = new(e.X, e.Y, e.Width, e.Height),
+                })
+                .ToList(),
+        };
+
+        return recognizedResult;
     }
 }

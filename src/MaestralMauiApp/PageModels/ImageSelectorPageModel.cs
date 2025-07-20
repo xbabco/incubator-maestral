@@ -11,6 +11,9 @@ public partial class ImageSelectorPageModel : ObservableObject
 {
     private readonly IOcrService _ocr;
 
+    [ObservableProperty]
+    public partial RecognizedTextResult? RecognizedTextResult { get; set; } = null;
+
     public ImageSelectorPageModel(IOcrService ocr)
     {
         _ocr = ocr;
@@ -18,10 +21,10 @@ public partial class ImageSelectorPageModel : ObservableObject
     }
 
     [ObservableProperty]
-    private ImageSource _selectedImage = "sample_image.jpg";
+    public partial ImageSource SelectedImage { get; set; } = "sample_image.jpg";
 
     [ObservableProperty]
-    private bool _isBusy = false;
+    public partial bool IsBusy { get; set; } = false;
 
     [RelayCommand]
     private async Task SelectImage()
@@ -43,6 +46,7 @@ public partial class ImageSelectorPageModel : ObservableObject
             }
 
             SelectedImage = ImageSource.FromFile(fileResult.FullPath);
+            RecognizedTextResult = null;
         }
         catch (Exception ex)
         {
@@ -69,7 +73,7 @@ public partial class ImageSelectorPageModel : ObservableObject
 
             var result = await _ocr.RecognizeTextAsync(imageData).ConfigureAwait(false);
 
-            if (result.Success)
+            if (result != null && result.Success)
             {
                 await AppShell.DisplayToastAsync("Text recognized!").ConfigureAwait(false);
                 Debug.WriteLine(result.AllText);
@@ -81,6 +85,7 @@ public partial class ImageSelectorPageModel : ObservableObject
                     .DisplayToastAsync("No text found or an error occurred.")
                     .ConfigureAwait(false);
             }
+            RecognizedTextResult = ConvertOcrResultToRecognizedTextResult(result);
         }
         catch (Exception ex)
         {
@@ -103,16 +108,14 @@ public partial class ImageSelectorPageModel : ObservableObject
             {
                 if (Path.IsPathRooted(fileSource.File))
                 {
-                    stream = File.OpenRead(fileSource.File);
+                    stream = await Task.Run(() => File.OpenRead(fileSource.File))
+                        .ConfigureAwait(false);
                 }
                 else
                 {
                     stream = await FileSystem
                         .OpenAppPackageFileAsync(fileSource.File)
                         .ConfigureAwait(false);
-                    //using var memoryStream = new MemoryStream();
-                    //await stream.CopyToAsync(memoryStream);
-                    //byte[] imageBytes = memoryStream.ToArray();
                 }
             }
             else if (imageSource is StreamImageSource streamSource)
@@ -133,5 +136,22 @@ public partial class ImageSelectorPageModel : ObservableObject
         {
             stream?.Dispose();
         }
+    }
+
+    private static RecognizedTextResult ConvertOcrResultToRecognizedTextResult(OcrResult? ocrResult)
+    {
+        var recognizedResult = new RecognizedTextResult(ocrResult?.AllText ?? string.Empty)
+        {
+            Blocks =
+                ocrResult
+                    ?.Elements?.Select(it => new RecognizedTextBlock
+                    {
+                        Text = it.Text ?? string.Empty,
+                        BoundingBox = new RectF(it.X, it.Y, it.Width, it.Height),
+                    })
+                    .ToList() ?? [],
+        };
+
+        return recognizedResult;
     }
 }

@@ -20,43 +20,48 @@ public partial class ProjectDetailPageModel
     private readonly ModalErrorHandler _errorHandler;
 
     [ObservableProperty]
-    private string _name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _description = string.Empty;
+    public partial string Description { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private List<ProjectTask> _tasks = [];
+    public partial List<ProjectTask> Tasks { get; set; } = [];
 
     [ObservableProperty]
-    private List<Category> _categories = [];
+    public partial List<Category> Categories { get; set; } = [];
 
     [ObservableProperty]
-    private Category? _category;
+    public partial Category? Category { get; set; }
 
     [ObservableProperty]
-    private int _categoryIndex = -1;
+    public partial int CategoryIndex { get; set; } = -1;
 
     [ObservableProperty]
-    private List<Tag> _allTags = [];
+    public partial List<Tag> AllTags { get; set; } = [];
 
     [ObservableProperty]
-    private IconData _icon;
+    public partial IconData Icon { get; set; }
 
     [ObservableProperty]
-    bool _isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private List<IconData> _icons = new List<IconData>
-    {
-        new IconData { Icon = FluentUI.ribbon_24_regular, Description = "Ribbon Icon" },
-        new IconData { Icon = FluentUI.ribbon_star_24_regular, Description = "Ribbon Star Icon" },
-        new IconData { Icon = FluentUI.trophy_24_regular, Description = "Trophy Icon" },
-        new IconData { Icon = FluentUI.badge_24_regular, Description = "Badge Icon" },
-        new IconData { Icon = FluentUI.book_24_regular, Description = "Book Icon" },
-        new IconData { Icon = FluentUI.people_24_regular, Description = "People Icon" },
-        new IconData { Icon = FluentUI.bot_24_regular, Description = "Bot Icon" },
-    };
+    public partial List<IconData> Icons { get; set; } =
+        new List<IconData>
+        {
+            new IconData { Icon = FluentUI.ribbon_24_regular, Description = "Ribbon Icon" },
+            new IconData
+            {
+                Icon = FluentUI.ribbon_star_24_regular,
+                Description = "Ribbon Star Icon",
+            },
+            new IconData { Icon = FluentUI.trophy_24_regular, Description = "Trophy Icon" },
+            new IconData { Icon = FluentUI.badge_24_regular, Description = "Badge Icon" },
+            new IconData { Icon = FluentUI.book_24_regular, Description = "Book Icon" },
+            new IconData { Icon = FluentUI.people_24_regular, Description = "People Icon" },
+            new IconData { Icon = FluentUI.bot_24_regular, Description = "Bot Icon" },
+        };
 
     public bool HasCompletedTasks => _project?.Tasks.Any(t => t.IsCompleted) ?? false;
 
@@ -73,7 +78,7 @@ public partial class ProjectDetailPageModel
         _categoryRepository = categoryRepository;
         _tagRepository = tagRepository;
         _errorHandler = errorHandler;
-        _icon = _icons.First();
+        Icon = Icons.First();
         Tasks = [];
     }
 

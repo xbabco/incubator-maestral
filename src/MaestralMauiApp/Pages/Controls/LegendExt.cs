@@ -4,7 +4,7 @@ using Syncfusion.Maui.Toolkit.Charts;
 
 namespace MaestralMauiApp.Pages.Controls;
 
-public class LegendExt : ChartLegend
+public partial class LegendExt : ChartLegend
 {
     protected override double GetMaximumSizeCoefficient()
     {

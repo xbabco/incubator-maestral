@@ -5,31 +5,14 @@ namespace MaestralMauiApp.Services;
 /// <summary>
 /// Platform-independent wrapper for recognized text results, including blocks, lines, and elements.
 /// </summary>
-public class RecognizedTextResult
+public class RecognizedTextResult(string text)
 {
-    public string Text { get; set; } = string.Empty;
+    public string Text { get; set; } = text;
     public List<RecognizedTextBlock> Blocks { get; set; } = [];
-
-    public RecognizedTextResult(string text)
-    {
-        Text = text;
-        Blocks = new List<RecognizedTextBlock>();
-    }
 }
 
 public class RecognizedTextBlock
 {
     public string Text { get; set; } = string.Empty;
-    public List<RecognizedTextLine> Lines { get; set; } = new();
-}
-
-public class RecognizedTextLine
-{
-    public string Text { get; set; } = string.Empty;
-    public List<RecognizedTextElement> Elements { get; set; } = new();
-}
-
-public class RecognizedTextElement
-{
-    public string Text { get; set; } = string.Empty;
+    public RectF BoundingBox { get; set; } // Position and size of block
 }

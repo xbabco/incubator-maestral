@@ -2,14 +2,44 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:pageModels="clr-namespace:MaestralMauiApp.PageModels"
+             xmlns:controls="clr-namespace:MaestralMauiApp.Pages.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:pages="clr-namespace:MaestralMauiApp.Pages"
              x:Class="MaestralMauiApp.Pages.TextRecognitionImagePage"
              x:DataType="pageModels:TextRecognitionImagePageModel"
-             Title="Text Recognition Image">
-    <ScrollView>
-        <VerticalStackLayout Spacing="24" Padding="24">
-            <Image Source="{Binding SelectedImage}" HeightRequest="300" Aspect="AspectFit" />
-            <Button Text="Pick Image" Command="{Binding SelectImageCommand}" />
-            <Label Text="{Binding RecognizedText}" />
-        </VerticalStackLayout>
-    </ScrollView>
+             x:Name="xContentPage"
+             Title="Recognize Text">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto"
+          RowSpacing="10"
+          ColumnDefinitions="*,*"
+          ColumnSpacing="10"
+          Padding="10">
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+            <Image x:Name="xImage" Aspect="AspectFit"
+                    HorizontalOptions="Start" VerticalOptions="Start"
+                    Source="{Binding SelectedImage}" />
+            <GraphicsView
+                x:Name="GraphicOverlay"
+                HorizontalOptions="Start" VerticalOptions="Start"
+                HeightRequest="{Binding x:DataType=Image, Source={x:Reference xImage}, Path=Height}"
+                WidthRequest="{Binding x:DataType=Image, Source={x:Reference xImage}, Path=Width}"
+                Drawable="{Binding x:DataType=pages:TextRecognitionImagePage, Source={x:Reference xContentPage}, Path=OverlayDrawable}" />
+        </Grid>
+
+        <!--<Button Text="Select Image"
+            Grid.Row="1" Grid.Column="0"
+            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+            Command="{Binding SelectImageCommand}" />
+
+        <Button Text="Process"
+            Grid.Row="1"  Grid.Column="1"
+            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+            Command="{Binding TextRecognitionCommand}" />-->
+    </Grid>
 </ContentPage>
