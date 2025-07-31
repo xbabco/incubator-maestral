@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-namespace MaestralMauiApp.Services;
+namespace Maestral.Core.Services;
 
 public class StubTextRecognizer : ITextRecognizer
 {

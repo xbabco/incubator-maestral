@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
 namespace MaestralMauiApp.Pages.Controls;
 

@@ -1,6 +1,7 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Diagnostics;
+using Font = Microsoft.Maui.Graphics.Font;
 
 namespace MaestralMauiApp.Pages.Controls;
 
@@ -36,13 +37,50 @@ public class TextGraphic(
         canvas.FillRectangle(translatedBoundingBox);
 
         canvas.FontColor = textColor;
-        canvas.FontSize = translatedBoundingBox.Height * 0.75f;
-
+        var maxSize = (float)Math.Floor(translatedBoundingBox.Height * 0.8f);
+        var fontSize = FindMaxFontSize(canvas, text, translatedBoundingBox, maxSize: maxSize);
+        canvas.FontSize = fontSize;
+        Debug.WriteLine(
+            $"TextGraphic.Draw. text: {text} translatedBoundingBox: {translatedBoundingBox}."
+        );
+        Debug.WriteLine($"TextGraphic.Draw. canvas.FontSize: {fontSize} maxSize: {maxSize}");
         canvas.DrawString(
             text,
             translatedBoundingBox,
             HorizontalAlignment.Center,
             VerticalAlignment.Center
         );
+    }
+
+    static float FindMaxFontSize(
+        ICanvas canvas,
+        string text,
+        RectF rect,
+        float minSize = 1f,
+        float maxSize = 200f
+    )
+    {
+        var bestSize = minSize;
+        while (minSize <= maxSize)
+        {
+            var mid = (minSize + maxSize) / 2f;
+            var size = canvas.GetStringSize(
+                text,
+                Font.Default,
+                mid,
+                HorizontalAlignment.Center,
+                VerticalAlignment.Center
+            );
+            if (size.Width <= rect.Width && size.Height <= rect.Height)
+            {
+                bestSize = mid;
+                minSize = mid + 0.5f; // Try larger
+            }
+            else
+            {
+                maxSize = mid - 0.5f; // Try smaller
+            }
+        }
+        return bestSize / 1.10f;
     }
 }

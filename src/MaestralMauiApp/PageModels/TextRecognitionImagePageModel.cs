@@ -37,7 +37,7 @@ public partial class TextRecognitionImagePageModel : ObservableObject
                         FileTypes = FilePickerFileType.Images,
                     }
                 )
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
 
             if (fileResult != null)
             {

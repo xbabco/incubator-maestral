@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-public class WindowsTextRecognizer : MaestralMauiApp.Services.ITextRecognizer
+public class WindowsTextRecognizer : ITextRecognizer
 {
     public Task<RecognizedTextResult> RecognizeTextAsync(Stream imageStream)
     {

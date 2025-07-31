@@ -3,7 +3,7 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Maui.Core.Extensions;
 
-namespace MaestralMauiApp.Models;
+namespace Maestral.Core.Models;
 
 public class Tag
 {

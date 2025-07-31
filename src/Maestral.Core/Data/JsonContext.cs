@@ -1,7 +1,7 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Text.Json.Serialization;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
 [JsonSerializable(typeof(Project))]
 [JsonSerializable(typeof(ProjectTask))]

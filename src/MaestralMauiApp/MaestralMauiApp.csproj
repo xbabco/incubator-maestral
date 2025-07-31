@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup>
         <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))"
             >$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks
@@ -91,21 +94,19 @@
         />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
-        <PackageReference Include="Plugin.Maui.OCR" Version="1.0.15" />
+        <PackageReference Include="Microsoft.Maui.Controls" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+        <PackageReference Include="Plugin.Maui.OCR" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-        <PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
-        <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.8" />
-        <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
-        <PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.4" />
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="CommunityToolkit.Maui" />
+        <PackageReference Include="Microsoft.Data.Sqlite.Core" />
+        <PackageReference Include="SQLitePCLRaw.bundle_green" />
+        <PackageReference Include="Syncfusion.Maui.Toolkit" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Update="Services\StubTextRecognizer.cs">
-            <ExcludeFromCurrentConfiguration>true</ExcludeFromCurrentConfiguration>
-        </Compile>
+        <ProjectReference Include="..\Maestral.Core\Maestral.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
         <MauiXaml Update="Pages\ImageSelectorPage.xaml">

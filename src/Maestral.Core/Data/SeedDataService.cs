@@ -1,10 +1,10 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Text.Json;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 using Microsoft.Extensions.Logging;
 
-namespace MaestralMauiApp.Data;
+namespace Maestral.Core.Data;
 
 public class SeedDataService
 {

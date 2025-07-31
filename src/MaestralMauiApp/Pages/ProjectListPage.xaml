@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:pageModels="clr-namespace:MaestralMauiApp.PageModels"
-             xmlns:models="clr-namespace:MaestralMauiApp.Models"
+             xmlns:models="clr-namespace:Maestral.Core.Models;assembly=Maestral.Core"
              xmlns:controls="clr-namespace:MaestralMauiApp.Pages.Controls"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="MaestralMauiApp.Pages.ProjectListPage"

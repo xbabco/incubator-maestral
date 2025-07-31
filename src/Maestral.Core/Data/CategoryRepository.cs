@@ -1,41 +1,31 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Globalization;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
-namespace MaestralMauiApp.Data;
+namespace Maestral.Core.Data;
 
 /// <summary>
-/// Repository class for managing projects in the database.
+/// Repository class for managing categories in the database.
 /// </summary>
-public class ProjectRepository
+public class CategoryRepository
 {
     private bool _hasBeenInitialized;
     private readonly ILogger _logger;
-    private readonly TaskRepository _taskRepository;
-    private readonly TagRepository _tagRepository;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ProjectRepository"/> class.
+    /// Initializes a new instance of the <see cref="CategoryRepository"/> class.
     /// </summary>
-    /// <param name="taskRepository">The task repository instance.</param>
-    /// <param name="tagRepository">The tag repository instance.</param>
     /// <param name="logger">The logger instance.</param>
-    public ProjectRepository(
-        TaskRepository taskRepository,
-        TagRepository tagRepository,
-        ILogger<ProjectRepository> logger
-    )
+    public CategoryRepository(ILogger<CategoryRepository> logger)
     {
-        _taskRepository = taskRepository;
-        _tagRepository = tagRepository;
         _logger = logger;
     }
 
     /// <summary>
-    /// Initializes the database connection and creates the Project table if it does not exist.
+    /// Initializes the database connection and creates the Category table if it does not exist.
     /// </summary>
     private async Task Init()
     {
@@ -53,18 +43,16 @@ public class ProjectRepository
             var createTableCmd = connection.CreateCommand();
             createTableCmd.CommandText =
                 @"
-            CREATE TABLE IF NOT EXISTS Project (
+            CREATE TABLE IF NOT EXISTS Category (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT NOT NULL,
-                Description TEXT NOT NULL,
-                Icon TEXT NOT NULL,
-                CategoryID INTEGER NOT NULL
+                Title TEXT NOT NULL,
+                Color TEXT NOT NULL
             );";
             await createTableCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error creating Project table");
+            _logger.LogError(e, "Error creating Category table");
             throw;
         }
 
@@ -72,10 +60,10 @@ public class ProjectRepository
     }
 
     /// <summary>
-    /// Retrieves a list of all projects from the database.
+    /// Retrieves a list of all categories from the database.
     /// </summary>
-    /// <returns>A list of <see cref="Project"/> objects.</returns>
-    public async Task<List<Project>> ListAsync()
+    /// <returns>A list of <see cref="Category"/> objects.</returns>
+    public async Task<List<Category>> ListAsync()
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -83,40 +71,32 @@ public class ProjectRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var selectCmd = connection.CreateCommand();
-        selectCmd.CommandText = "SELECT * FROM Project";
-        var projects = new List<Project>();
+        selectCmd.CommandText = "SELECT * FROM Category";
+        var categories = new List<Category>();
 
         var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false);
         await using var __ = reader.ConfigureAwait(false);
         while (await reader.ReadAsync().ConfigureAwait(false))
         {
-            projects.Add(
-                new Project
+            categories.Add(
+                new Category
                 {
                     ID = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Description = reader.GetString(2),
-                    Icon = reader.GetString(3),
-                    CategoryID = reader.GetInt32(4),
+                    Title = reader.GetString(1),
+                    Color = reader.GetString(2),
                 }
             );
         }
 
-        foreach (var project in projects)
-        {
-            project.Tags = await _tagRepository.ListAsync(project.ID).ConfigureAwait(false);
-            project.Tasks = await _taskRepository.ListAsync(project.ID).ConfigureAwait(false);
-        }
-
-        return projects;
+        return categories;
     }
 
     /// <summary>
-    /// Retrieves a specific project by its ID.
+    /// Retrieves a specific category by its ID.
     /// </summary>
-    /// <param name="id">The ID of the project.</param>
-    /// <returns>A <see cref="Project"/> object if found; otherwise, null.</returns>
-    public async Task<Project?> GetAsync(int id)
+    /// <param name="id">The ID of the category.</param>
+    /// <returns>A <see cref="Category"/> object if found; otherwise, null.</returns>
+    public async Task<Category?> GetAsync(int id)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -124,37 +104,30 @@ public class ProjectRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var selectCmd = connection.CreateCommand();
-        selectCmd.CommandText = "SELECT * FROM Project WHERE ID = @id";
+        selectCmd.CommandText = "SELECT * FROM Category WHERE ID = @id";
         selectCmd.Parameters.AddWithValue("@id", id);
 
         var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false);
         await using var __ = reader.ConfigureAwait(false);
         if (await reader.ReadAsync().ConfigureAwait(false))
         {
-            var project = new Project
+            return new Category
             {
                 ID = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Description = reader.GetString(2),
-                Icon = reader.GetString(3),
-                CategoryID = reader.GetInt32(4),
+                Title = reader.GetString(1),
+                Color = reader.GetString(2),
             };
-
-            project.Tags = await _tagRepository.ListAsync(project.ID).ConfigureAwait(false);
-            project.Tasks = await _taskRepository.ListAsync(project.ID).ConfigureAwait(false);
-
-            return project;
         }
 
         return null;
     }
 
     /// <summary>
-    /// Saves a project to the database. If the project ID is 0, a new project is created; otherwise, the existing project is updated.
+    /// Saves a category to the database. If the category ID is 0, a new category is created; otherwise, the existing category is updated.
     /// </summary>
-    /// <param name="item">The project to save.</param>
-    /// <returns>The ID of the saved project.</returns>
-    public async Task<int> SaveItemAsync(Project item)
+    /// <param name="item">The category to save.</param>
+    /// <returns>The ID of the saved category.</returns>
+    public async Task<int> SaveItemAsync(Category item)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -166,24 +139,21 @@ public class ProjectRepository
         {
             saveCmd.CommandText =
                 @"
-                INSERT INTO Project (Name, Description, Icon, CategoryID)
-                VALUES (@Name, @Description, @Icon, @CategoryID);
+                INSERT INTO Category (Title, Color)
+                VALUES (@Title, @Color);
                 SELECT last_insert_rowid();";
         }
         else
         {
             saveCmd.CommandText =
                 @"
-                UPDATE Project
-                SET Name = @Name, Description = @Description, Icon = @Icon, CategoryID = @CategoryID
+                UPDATE Category SET Title = @Title, Color = @Color
                 WHERE ID = @ID";
             saveCmd.Parameters.AddWithValue("@ID", item.ID);
         }
 
-        saveCmd.Parameters.AddWithValue("@Name", item.Name);
-        saveCmd.Parameters.AddWithValue("@Description", item.Description);
-        saveCmd.Parameters.AddWithValue("@Icon", item.Icon);
-        saveCmd.Parameters.AddWithValue("@CategoryID", item.CategoryID);
+        saveCmd.Parameters.AddWithValue("@Title", item.Title);
+        saveCmd.Parameters.AddWithValue("@Color", item.Color);
 
         var result = await saveCmd.ExecuteScalarAsync().ConfigureAwait(false);
         if (item.ID == 0)
@@ -195,11 +165,11 @@ public class ProjectRepository
     }
 
     /// <summary>
-    /// Deletes a project from the database.
+    /// Deletes a category from the database.
     /// </summary>
-    /// <param name="item">The project to delete.</param>
+    /// <param name="item">The category to delete.</param>
     /// <returns>The number of rows affected.</returns>
-    public async Task<int> DeleteItemAsync(Project item)
+    public async Task<int> DeleteItemAsync(Category item)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -207,14 +177,14 @@ public class ProjectRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var deleteCmd = connection.CreateCommand();
-        deleteCmd.CommandText = "DELETE FROM Project WHERE ID = @ID";
-        deleteCmd.Parameters.AddWithValue("@ID", item.ID);
+        deleteCmd.CommandText = "DELETE FROM Category WHERE ID = @id";
+        deleteCmd.Parameters.AddWithValue("@id", item.ID);
 
         return await deleteCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Drops the Project table from the database.
+    /// Drops the Category table from the database.
     /// </summary>
     public async Task DropTableAsync()
     {
@@ -223,12 +193,10 @@ public class ProjectRepository
         await using var _ = connection.ConfigureAwait(false);
         await connection.OpenAsync().ConfigureAwait(false);
 
-        var dropCmd = connection.CreateCommand();
-        dropCmd.CommandText = "DROP TABLE IF EXISTS Project";
-        await dropCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        var dropTableCmd = connection.CreateCommand();
+        dropTableCmd.CommandText = "DROP TABLE IF EXISTS Category";
 
-        await _taskRepository.DropTableAsync().ConfigureAwait(false);
-        await _tagRepository.DropTableAsync().ConfigureAwait(false);
+        await dropTableCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         _hasBeenInitialized = false;
     }
 }

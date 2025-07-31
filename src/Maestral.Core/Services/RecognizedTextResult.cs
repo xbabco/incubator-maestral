@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-namespace MaestralMauiApp.Services;
+namespace Maestral.Core.Services;
 
 /// <summary>
 /// Platform-independent wrapper for recognized text results, including blocks, lines, and elements.

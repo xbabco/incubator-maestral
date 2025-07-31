@@ -3,7 +3,7 @@
 #nullable disable
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
 namespace MaestralMauiApp.PageModels;
 

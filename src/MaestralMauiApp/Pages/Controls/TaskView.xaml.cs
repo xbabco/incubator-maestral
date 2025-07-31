@@ -1,7 +1,7 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Windows.Input;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
 namespace MaestralMauiApp.Pages.Controls;
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+        <PackageVersion Include="Plugin.Maui.OCR" Version="1.0.15" />
+        <PackageVersion Include="CommunityToolkit.Maui.Core" Version="8.0.1" />
+        <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageVersion Include="CommunityToolkit.Maui" Version="9.1.1" />
+        <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="8.0.18" />
+        <PackageVersion Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
+        <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
+    </ItemGroup>
+</Project>

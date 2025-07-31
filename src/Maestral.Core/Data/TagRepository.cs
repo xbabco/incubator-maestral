@@ -1,11 +1,11 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Globalization;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
-namespace MaestralMauiApp.Data;
+namespace Maestral.Core.Data;
 
 /// <summary>
 /// Repository class for managing tags in the database.

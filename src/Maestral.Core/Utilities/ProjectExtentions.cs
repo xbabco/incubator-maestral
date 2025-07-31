@@ -1,9 +1,9 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Diagnostics.CodeAnalysis;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
-namespace MaestralMauiApp.Utilities;
+namespace Maestral.Core.Utilities;
 
 /// <summary>
 /// Project Model Extentions

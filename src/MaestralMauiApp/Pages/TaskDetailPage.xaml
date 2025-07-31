@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
              xmlns:pageModel="clr-namespace:MaestralMauiApp.PageModels"
-             xmlns:models="clr-namespace:MaestralMauiApp.Models"
+             xmlns:models="clr-namespace:Maestral.Core.Models;assembly=Maestral.Core"
              x:DataType="pageModel:TaskDetailPageModel"
              x:Class="MaestralMauiApp.Pages.TaskDetailPage"
              Title="Task">

@@ -7,18 +7,12 @@ using Plugin.Maui.OCR;
 
 namespace MaestralMauiApp.PageModels;
 
-public partial class ImageSelectorPageModel : ObservableObject
+public partial class ImageSelectorPageModel(IOcrService ocr) : ObservableObject
 {
-    private readonly IOcrService _ocr;
+    private readonly IOcrService _ocr = ocr;
 
     [ObservableProperty]
     public partial RecognizedTextResult? RecognizedTextResult { get; set; } = null;
-
-    public ImageSelectorPageModel(IOcrService ocr)
-    {
-        _ocr = ocr;
-        _ocr.InitAsync();
-    }
 
     [ObservableProperty]
     public partial ImageSource SelectedImage { get; set; } = "sample_image.jpg";
@@ -39,7 +33,7 @@ public partial class ImageSelectorPageModel : ObservableObject
                         FileTypes = FilePickerFileType.Images,
                     }
                 )
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
             if (fileResult == null)
             {
                 return;
@@ -52,7 +46,7 @@ public partial class ImageSelectorPageModel : ObservableObject
         {
             await AppShell
                 .DisplayToastAsync($"Error selecting image: {ex.Message}")
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
         }
     }
 
@@ -62,20 +56,18 @@ public partial class ImageSelectorPageModel : ObservableObject
         IsBusy = true;
         try
         {
-            var imageData = await GetImageDataAsync(SelectedImage).ConfigureAwait(false);
+            var imageData = await GetImageDataAsync(SelectedImage).ConfigureAwait(true);
             if (imageData == null)
             {
-                await AppShell
-                    .DisplayToastAsync("Could not read image data.")
-                    .ConfigureAwait(false);
+                await AppShell.DisplayToastAsync("Could not read image data.").ConfigureAwait(true);
                 return;
             }
 
-            var result = await _ocr.RecognizeTextAsync(imageData).ConfigureAwait(false);
+            var result = await _ocr.RecognizeTextAsync(imageData).ConfigureAwait(true);
 
             if (result != null && result.Success)
             {
-                await AppShell.DisplayToastAsync("Text recognized!").ConfigureAwait(false);
+                await AppShell.DisplayToastAsync("Text recognized!").ConfigureAwait(true);
                 Debug.WriteLine(result.AllText);
                 Console.WriteLine(result.AllText);
             }
@@ -83,7 +75,7 @@ public partial class ImageSelectorPageModel : ObservableObject
             {
                 await AppShell
                     .DisplayToastAsync("No text found or an error occurred.")
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
             }
             RecognizedTextResult = ConvertOcrResultToRecognizedTextResult(result);
         }
@@ -91,7 +83,7 @@ public partial class ImageSelectorPageModel : ObservableObject
         {
             await AppShell
                 .DisplayToastAsync($"Error during text recognition: {ex.Message}")
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
         }
         finally
         {

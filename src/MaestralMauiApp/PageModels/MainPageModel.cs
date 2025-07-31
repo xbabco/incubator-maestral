@@ -3,7 +3,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 
 namespace MaestralMauiApp.PageModels;
 
@@ -172,7 +172,7 @@ public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
         }
 
         OnPropertyChanged(nameof(HasCompletedTasks));
-        Tasks = new(Tasks);
-        await AppShell.DisplayToastAsync("All cleaned up!").ConfigureAwait(false);
+        Tasks = [.. Tasks];
+        await AppShell.DisplayToastAsync("All cleaned up!").ConfigureAwait(true);
     }
 }

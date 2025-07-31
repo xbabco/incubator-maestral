@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Plugin.Maui.OCR;
 using Syncfusion.Maui.Toolkit.Hosting;
 
+[assembly: XamlProcessing(XamlInflator.SourceGen)]
 namespace MaestralMauiApp;
 
 public static class MauiProgram
@@ -60,8 +61,7 @@ public static class MauiProgram
             TextRecognitionImagePageModel
         >("textrecognitionimage");
 
-        builder.Services.AddSingleton(OcrPlugin.Default);
-
+        builder.Services.AddSingleton<IOcrService>(OcrPlugin.Default);
         return builder.Build();
     }
 }

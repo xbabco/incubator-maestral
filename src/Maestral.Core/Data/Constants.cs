@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-namespace MaestralMauiApp.Data;
+namespace Maestral.Core.Data;
 
 public static class Constants
 {

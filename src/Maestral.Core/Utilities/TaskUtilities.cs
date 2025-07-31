@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-namespace MaestralMauiApp.Utilities;
+namespace Maestral.Core.Utilities;
 
 /// <summary>
 /// Task Utilities.

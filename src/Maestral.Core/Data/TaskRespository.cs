@@ -1,31 +1,31 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
 using System.Globalization;
-using MaestralMauiApp.Models;
+using Maestral.Core.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
-namespace MaestralMauiApp.Data;
+namespace Maestral.Core.Data;
 
 /// <summary>
-/// Repository class for managing categories in the database.
+/// Repository class for managing tasks in the database.
 /// </summary>
-public class CategoryRepository
+public class TaskRepository
 {
     private bool _hasBeenInitialized;
     private readonly ILogger _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CategoryRepository"/> class.
+    /// Initializes a new instance of the <see cref="TaskRepository"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
-    public CategoryRepository(ILogger<CategoryRepository> logger)
+    public TaskRepository(ILogger<TaskRepository> logger)
     {
         _logger = logger;
     }
 
     /// <summary>
-    /// Initializes the database connection and creates the Category table if it does not exist.
+    /// Initializes the database connection and creates the Task table if it does not exist.
     /// </summary>
     private async Task Init()
     {
@@ -43,16 +43,17 @@ public class CategoryRepository
             var createTableCmd = connection.CreateCommand();
             createTableCmd.CommandText =
                 @"
-            CREATE TABLE IF NOT EXISTS Category (
+            CREATE TABLE IF NOT EXISTS Task (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Title TEXT NOT NULL,
-                Color TEXT NOT NULL
+                IsCompleted INTEGER NOT NULL,
+                ProjectID INTEGER NOT NULL
             );";
             await createTableCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error creating Category table");
+            _logger.LogError(e, "Error creating Task table");
             throw;
         }
 
@@ -60,10 +61,10 @@ public class CategoryRepository
     }
 
     /// <summary>
-    /// Retrieves a list of all categories from the database.
+    /// Retrieves a list of all tasks from the database.
     /// </summary>
-    /// <returns>A list of <see cref="Category"/> objects.</returns>
-    public async Task<List<Category>> ListAsync()
+    /// <returns>A list of <see cref="ProjectTask"/> objects.</returns>
+    public async Task<List<ProjectTask>> ListAsync()
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -71,32 +72,33 @@ public class CategoryRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var selectCmd = connection.CreateCommand();
-        selectCmd.CommandText = "SELECT * FROM Category";
-        var categories = new List<Category>();
+        selectCmd.CommandText = "SELECT * FROM Task";
+        var tasks = new List<ProjectTask>();
 
         var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false);
         await using var __ = reader.ConfigureAwait(false);
         while (await reader.ReadAsync().ConfigureAwait(false))
         {
-            categories.Add(
-                new Category
+            tasks.Add(
+                new ProjectTask
                 {
                     ID = reader.GetInt32(0),
                     Title = reader.GetString(1),
-                    Color = reader.GetString(2),
+                    IsCompleted = reader.GetBoolean(2),
+                    ProjectID = reader.GetInt32(3),
                 }
             );
         }
 
-        return categories;
+        return tasks;
     }
 
     /// <summary>
-    /// Retrieves a specific category by its ID.
+    /// Retrieves a list of tasks associated with a specific project.
     /// </summary>
-    /// <param name="id">The ID of the category.</param>
-    /// <returns>A <see cref="Category"/> object if found; otherwise, null.</returns>
-    public async Task<Category?> GetAsync(int id)
+    /// <param name="projectId">The ID of the project.</param>
+    /// <returns>A list of <see cref="ProjectTask"/> objects.</returns>
+    public async Task<List<ProjectTask>> ListAsync(int projectId)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -104,18 +106,54 @@ public class CategoryRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var selectCmd = connection.CreateCommand();
-        selectCmd.CommandText = "SELECT * FROM Category WHERE ID = @id";
+        selectCmd.CommandText = "SELECT * FROM Task WHERE ProjectID = @projectId";
+        selectCmd.Parameters.AddWithValue("@projectId", projectId);
+        var tasks = new List<ProjectTask>();
+
+        var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false);
+        await using var __ = reader.ConfigureAwait(false);
+        while (await reader.ReadAsync().ConfigureAwait(false))
+        {
+            tasks.Add(
+                new ProjectTask
+                {
+                    ID = reader.GetInt32(0),
+                    Title = reader.GetString(1),
+                    IsCompleted = reader.GetBoolean(2),
+                    ProjectID = reader.GetInt32(3),
+                }
+            );
+        }
+
+        return tasks;
+    }
+
+    /// <summary>
+    /// Retrieves a specific task by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the task.</param>
+    /// <returns>A <see cref="ProjectTask"/> object if found; otherwise, null.</returns>
+    public async Task<ProjectTask?> GetAsync(int id)
+    {
+        await Init().ConfigureAwait(false);
+        var connection = new SqliteConnection(Constants.DatabasePath);
+        await using var _ = connection.ConfigureAwait(false);
+        await connection.OpenAsync().ConfigureAwait(false);
+
+        var selectCmd = connection.CreateCommand();
+        selectCmd.CommandText = "SELECT * FROM Task WHERE ID = @id";
         selectCmd.Parameters.AddWithValue("@id", id);
 
         var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false);
         await using var __ = reader.ConfigureAwait(false);
         if (await reader.ReadAsync().ConfigureAwait(false))
         {
-            return new Category
+            return new ProjectTask
             {
                 ID = reader.GetInt32(0),
                 Title = reader.GetString(1),
-                Color = reader.GetString(2),
+                IsCompleted = reader.GetBoolean(2),
+                ProjectID = reader.GetInt32(3),
             };
         }
 
@@ -123,11 +161,11 @@ public class CategoryRepository
     }
 
     /// <summary>
-    /// Saves a category to the database. If the category ID is 0, a new category is created; otherwise, the existing category is updated.
+    /// Saves a task to the database. If the task ID is 0, a new task is created; otherwise, the existing task is updated.
     /// </summary>
-    /// <param name="item">The category to save.</param>
-    /// <returns>The ID of the saved category.</returns>
-    public async Task<int> SaveItemAsync(Category item)
+    /// <param name="item">The task to save.</param>
+    /// <returns>The ID of the saved task.</returns>
+    public async Task<int> SaveItemAsync(ProjectTask item)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -139,21 +177,20 @@ public class CategoryRepository
         {
             saveCmd.CommandText =
                 @"
-                INSERT INTO Category (Title, Color)
-                VALUES (@Title, @Color);
-                SELECT last_insert_rowid();";
+            INSERT INTO Task (Title, IsCompleted, ProjectID) VALUES (@title, @isCompleted, @projectId);
+            SELECT last_insert_rowid();";
         }
         else
         {
             saveCmd.CommandText =
                 @"
-                UPDATE Category SET Title = @Title, Color = @Color
-                WHERE ID = @ID";
-            saveCmd.Parameters.AddWithValue("@ID", item.ID);
+            UPDATE Task SET Title = @title, IsCompleted = @isCompleted, ProjectID = @projectId WHERE ID = @id";
+            saveCmd.Parameters.AddWithValue("@id", item.ID);
         }
 
-        saveCmd.Parameters.AddWithValue("@Title", item.Title);
-        saveCmd.Parameters.AddWithValue("@Color", item.Color);
+        saveCmd.Parameters.AddWithValue("@title", item.Title);
+        saveCmd.Parameters.AddWithValue("@isCompleted", item.IsCompleted);
+        saveCmd.Parameters.AddWithValue("@projectId", item.ProjectID);
 
         var result = await saveCmd.ExecuteScalarAsync().ConfigureAwait(false);
         if (item.ID == 0)
@@ -165,11 +202,11 @@ public class CategoryRepository
     }
 
     /// <summary>
-    /// Deletes a category from the database.
+    /// Deletes a task from the database.
     /// </summary>
-    /// <param name="item">The category to delete.</param>
+    /// <param name="item">The task to delete.</param>
     /// <returns>The number of rows affected.</returns>
-    public async Task<int> DeleteItemAsync(Category item)
+    public async Task<int> DeleteItemAsync(ProjectTask item)
     {
         await Init().ConfigureAwait(false);
         var connection = new SqliteConnection(Constants.DatabasePath);
@@ -177,14 +214,14 @@ public class CategoryRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var deleteCmd = connection.CreateCommand();
-        deleteCmd.CommandText = "DELETE FROM Category WHERE ID = @id";
+        deleteCmd.CommandText = "DELETE FROM Task WHERE ID = @id";
         deleteCmd.Parameters.AddWithValue("@id", item.ID);
 
         return await deleteCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Drops the Category table from the database.
+    /// Drops the Task table from the database.
     /// </summary>
     public async Task DropTableAsync()
     {
@@ -194,8 +231,7 @@ public class CategoryRepository
         await connection.OpenAsync().ConfigureAwait(false);
 
         var dropTableCmd = connection.CreateCommand();
-        dropTableCmd.CommandText = "DROP TABLE IF EXISTS Category";
-
+        dropTableCmd.CommandText = "DROP TABLE IF EXISTS Task";
         await dropTableCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         _hasBeenInitialized = false;
     }

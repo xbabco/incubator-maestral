@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace MaestralMauiApp.Models;
+namespace Maestral.Core.Models;
 
 public class ProjectTask
 {

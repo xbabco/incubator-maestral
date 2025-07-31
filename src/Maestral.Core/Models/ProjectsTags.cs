@@ -1,6 +1,6 @@
 // Copyright © 2025 xbabco. All rights reserved.
 
-namespace MaestralMauiApp.Models;
+namespace Maestral.Core.Models;
 
 public class ProjectsTags
 {

@@ -3,6 +3,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using MaestralMauiApp.Pages.Controls;
+using Plugin.Maui.OCR;
 
 namespace MaestralMauiApp.Pages;
 
@@ -36,15 +37,26 @@ public partial class ImageSelectorPage : ContentPage, INotifyPropertyChanged
         xImage.SizeChanged += Image_SizeChanged;
     }
 
-    private void Image_SizeChanged(object? sender, EventArgs e)
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        await OcrPlugin.Default.InitAsync().ConfigureAwait(true);
+    }
+
+    private async void Image_SizeChanged(object? sender, EventArgs e)
     {
         if (xImage.Source is FileImageSource fileImageSource)
         {
             Debug.WriteLine(
                 $"ImageSelectorPage.Image_SizeChanged. Image source file: {fileImageSource.File}"
             );
-            // Load the image to get its pixel size
-            using var stream = File.OpenRead(fileImageSource.File);
+            // Expression to open the correct image stream based on file path
+            using var stream = Path.IsPathRooted(fileImageSource.File)
+                ? File.OpenRead(fileImageSource.File)
+                : await FileSystem
+                    .OpenAppPackageFileAsync(fileImageSource.File)
+                    .ConfigureAwait(true);
             var image = Microsoft.Maui.Graphics.Platform.PlatformImage.FromStream(stream);
             double imageWidth = image.Width;
             double imageHeight = image.Height;
