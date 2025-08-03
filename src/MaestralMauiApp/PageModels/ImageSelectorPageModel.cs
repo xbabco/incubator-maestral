@@ -51,7 +51,7 @@ public partial class ImageSelectorPageModel(IOcrService ocr) : ObservableObject
     }
 
     [RelayCommand]
-    private async Task TextRecognition()
+    private async Task RecognizeText()
     {
         IsBusy = true;
         try
@@ -62,8 +62,10 @@ public partial class ImageSelectorPageModel(IOcrService ocr) : ObservableObject
                 await AppShell.DisplayToastAsync("Could not read image data.").ConfigureAwait(true);
                 return;
             }
-
-            var result = await _ocr.RecognizeTextAsync(imageData).ConfigureAwait(true);
+            var b = new OcrOptions.Builder();
+            b.SetTryHard(true);
+            var options = b.Build();
+            var result = await _ocr.RecognizeTextAsync(imageData, options).ConfigureAwait(true);
 
             if (result != null && result.Success)
             {

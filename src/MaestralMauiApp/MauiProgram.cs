@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Plugin.Maui.OCR;
 using Syncfusion.Maui.Toolkit.Hosting;
 
-[assembly: XamlProcessing(XamlInflator.SourceGen)]
 namespace MaestralMauiApp;
 
 public static class MauiProgram
@@ -15,7 +14,10 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
+            .UseMauiCommunityToolkit(options =>
+            {
+                options.SetShouldEnableSnackbarOnWindows(true);
+            })
             .ConfigureSyncfusionToolkit()
             .ConfigureMauiHandlers(handlers =>
             {

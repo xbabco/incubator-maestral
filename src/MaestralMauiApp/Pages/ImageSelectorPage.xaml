@@ -40,6 +40,6 @@
         <Button Text="Process"
             Grid.Row="1"  Grid.Column="1"
             IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
-            Command="{Binding TextRecognitionCommand}" />
+            Command="{Binding RecognizeTextCommand}" />
     </Grid>
 </ContentPage>
