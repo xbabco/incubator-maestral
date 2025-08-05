@@ -3,6 +3,14 @@ import cv2
 import pytesseract
 import numpy as np
 
+
+def show_wait_destroy(winname, img):
+    cv2.imshow(winname, img)
+    cv2.moveWindow(winname, 500, 0)
+    cv2.waitKey(0)
+    cv2.destroyWindow(winname)
+
+
 def main():
     """
     Main function to process the image and extract numbers.
@@ -12,6 +20,10 @@ def main():
 
     # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # show_wait_destroy("gray", gray)
+
+    # imgBlured = cv2.GaussianBlur(gray, (21, 21), 3)
+    # show_wait_destroy("imgBlured", imgBlured)
 
     # Apply binary threshold
     thresh = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV, cv2.THRESH_OTSU)[1]
@@ -24,10 +36,23 @@ def main():
         x1, y1, x2, y2 = line[0]
         cv2.line(image, (x1, y1), (x2, y2), (36, 255, 12), 2)
 
-
     # --- 1. Create a clean grid mask ---
     # Create a new black image to draw the lines on
     grid_mask = np.zeros(image.shape[:2], dtype=np.uint8)
+
+    # 1. Create a blank mask the same size as your input
+    hough_mask = np.zeros_like(gray)
+
+    # 2. For each line, draw it into the mask in white
+    for x1, y1, x2, y2 in lines.reshape(-1,4):
+        cv2.line(hough_mask, (x1, y1), (x2, y2), 255, thickness=2)
+
+    # show_wait_destroy("hough_mask", hough_mask)
+
+    # 3. Merge that mask into your grid_mask (which is also single-channel)
+    #    You can use bitwise_or so any Hough-detected line will be included.
+    grid_mask = cv2.bitwise_or(grid_mask, hough_mask)
+    # show_wait_destroy("grid_mask", grid_mask)
 
     # Multi-pass horizontal line detection
     for kernel_size in [25, 15]:
